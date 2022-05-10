@@ -1,0 +1,282 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <title>A1 PokeAPI</title>
+        <link rel="stylesheet" href="index.css">
+        <link rel="stylesheet" href="loader.css">
+    </head>
+    <body>
+        <div id="content">
+            <header>
+                <h1><a href="./index.html">PokeAPI Client</a></h1>
+                <form action="pokemon.html">
+                    <select name="abilities" id="ability" onchange="displayFiltered();">
+                        <option value="null">Select Ability</option>
+                    </select>
+                    <select name="moves" id="move" onchange="displayFiltered();">
+                        <option value="null">Select Move</option>
+                    </select>
+                    <select name="types" id="type" onchange="displayFiltered();">
+                        <option value="null">Select Type</option>
+                    </select>
+                    
+                    <div>
+                        <input type="text" id="search" name="search" placeholder="Search by name..." value="" />
+                        <button type="submit">Search</button>
+                    </div>
+
+                    <select name="history" id="history" onchange="loadSearch();">
+                        <option value="null">History</option>
+                    </select>
+                </form>
+            </header>
+            <div id="pokemons">
+            <div class="lds-spinner"><div></div><div></div><div></div><div></div><div></div><div></div><div></div><div></div><div></div><div></div><div></div><div></div></div>
+            <template id="pokemonContainerTemplate">
+                <div class="pokemonContainer" onclick="search(this.querySelector('.pokemonName').innerHTML)">
+                    <h2 class="pokemonName"></h2>
+                    <img class="pokemonArt"/>
+                    <div class="pokemonStats">
+                        <div class="types">
+
+                        </div>
+                    </div>
+                </div>
+            </template>
+            </div>
+            <footer>
+                <p>Lachlan Butler - 2022</p>
+            </footer>
+        </div>
+        <script src="./pokeApiStuff.js"></script>
+        <script src="./misc.js"></script>
+        <script>
+            class searchHistory {
+                constructor(ability, move, type) {
+                    this.ability = ability;
+                    this.move = move;
+                    this.type = type;
+                }
+            }
+
+            let SearchHistory = {}
+
+            function saveSearch() {
+                const history = document.querySelector("#history");
+                let newSearchEntry = document.createElement("option");
+                let entry = new searchHistory(document.querySelector("#ability").value, document.querySelector("#move").value, document.querySelector("#type").value);
+                let date = (new Date());
+                let ts = Math.round(date.getTime() / 1000);
+                SearchHistory[ts] = entry;
+                
+                newSearchEntry.setAttribute("value", ts);
+                newSearchEntry.innerHTML = String(date.getHours() == 0 || date.getHours() == 12 ? 12 : date.getHours() % 12).padStart(2, '0') + ":" + String(date.getMinutes()).padStart(2, '0') + ":" + String(date.getSeconds()).padStart(2, '0');
+                history.appendChild(newSearchEntry);
+                history.value = ts;
+            }
+
+            function loadSearch() {
+                const history = document.querySelector("#history");
+                if (history.value == null) {
+                    return;
+                }
+
+                let entry = SearchHistory[history.value];
+                document.querySelector("#ability").value = entry.ability;
+                document.querySelector("#move").value = entry.move;
+                document.querySelector("#type").value = entry.type;
+                displayFiltered(false);
+            }
+
+            function search() {
+                if (document.querySelector("#search").value == "") { return; }
+                window.location.assign("./pokemon.html?search=" + document.querySelector("#search").value);
+            }
+
+            function search(pokerman) {
+                window.location.assign("./pokemon.html?search=" + pokerman);
+            }
+
+            function toggleLoader(enabled) {
+                const loader = document.querySelector(".lds-spinner");
+                loader.setAttribute("style", "display: " + (enabled ? "block" : "none") + ";");
+            }
+
+            async function fillRandomPokemons() {
+                let pokes = await getRequestAsync("https://pokeapi.co/api/v2/pokemon/?limit=" + "9999");
+
+                let parent = document.querySelector("#pokemons");
+                toggleLoader(false);
+                for (let i = 0; i < 9; i++) {
+                    let response = await getRandomPokemon(pokes);
+                    addPokemon(parent, response);
+                }
+            }
+
+            function purgePokemon(parent) {
+                const nodes = document.querySelectorAll(".pokemonContainer");
+                for (let i = 0; i < nodes.length; i++) {
+                    if (nodes[i].className != "lds-spinner") {
+                        parent.removeChild(nodes[i]);
+                    }
+                }
+            }
+
+            function addPokemon(parent, pokemon) {
+                return new Promise(resolve => {
+                    let template = document.querySelector("#pokemonContainerTemplate").content.cloneNode(true);
+                
+                    template.querySelector(".pokemonArt").setAttribute("src", getPokemonArtUrl(pokemon));
+                    template.querySelector(".pokemonName").innerHTML = getPokemonName(pokemon);
+
+                    let typesDiv = template.querySelector(".types");
+
+                    fillTypes(typesDiv, pokemon);
+                    parent.appendChild(template);
+                    resolve(true);
+                });
+            }
+
+            function fillTypes(parent, pokemon) {
+                for (let i = 0; i < pokemon["types"].length; i++) {
+                    let newNode = document.createElement("p");
+                    newNode.setAttribute("class", "type");
+                    newNode.innerHTML = pokemon["types"][i]["type"]["name"];
+                    newNode.setAttribute("style", "background-color:" + getTypeColour(pokemon["types"][i]["type"]["name"]) + ";");
+                    parent.appendChild(newNode);
+                }
+            }
+
+            function getListIntersect(...lists) {
+                let i = 0;
+                let finalList = [];
+
+                while (finalList.length == 0 && i < lists.length) {
+                    finalList = lists[i];
+                    i++;
+                }
+
+                for (i; i < lists.length; i++) {
+                    if (lists[i].length == 0) { continue; }
+                    finalList = finalList.filter(p => lists[i].map((a) => a.forms[0].name).includes(p.forms[0].name));
+                }
+                
+                return finalList;
+            }
+
+            function getFlag(...queries) {
+                let flag = 0;
+                for (let i = 0; i < queries.length; i++) {
+                    if (document.querySelector(queries[i]).value != "null") { 
+                        flag |= 1 << i;
+                    }
+                }
+
+                return flag;
+            }
+
+            async function displayFiltered(newEntry=true) {
+                const parent = document.querySelector("#pokemons");
+                purgePokemon(parent);
+                toggleLoader(true);
+
+                if (newEntry) {
+                    saveSearch();
+                }
+
+                let flag = getFlag("#type", "#ability", "#move");
+
+                if ((flag & 0b111) == 0) {
+                    window.location.reload();
+                    return;
+                }
+
+                if ((flag & 0b001) != 0) { // Type
+                    await getTypePokemon();
+                } else {
+                    allPokemonType = [];
+                }
+                if ((flag & 0b010) != 0) { // Ability
+                    await getAbilityPokemon();
+                } else {
+                    allPokemonAbility = [];
+                }
+                if ((flag & 0b100) != 0) { // Move
+                    await getMovePokemon();
+                } else {
+                    allPokemonMove = [];
+                }
+
+
+                let pIntersect = []
+                pIntersect = getListIntersect(allPokemonType, allPokemonAbility, allPokemonMove);
+
+                toggleLoader(false);
+                for (let i = 0; i < pIntersect.length; i++) {
+                    await addPokemon(parent, pIntersect[i]);
+                }
+            }
+
+            function getMovePokemon() {
+                return new Promise(resolve => {
+                    async function doStuff() {
+                        let response = getPokemonsByMove(document.querySelector("#move").value);
+
+                        allPokemonMove = [];
+                        for (let i = 0; i < response.length; i++) {
+                            allPokemonMove.push(await getRequestAsync(response[i]["url"]));
+                        }
+                        resolve(true);
+                    }
+                    doStuff();
+                });
+            }
+
+            function getTypePokemon() {
+                return new Promise(resolve => {
+                    async function doStuff() {
+                        let response = getPokemonsByType(document.querySelector("#type").value);
+
+                        allPokemonType = [];
+                        for (let i = 0; i < response.length; i++) {
+                            allPokemonType.push(await getRequestAsync(response[i]["pokemon"]["url"]));
+                        }
+                        resolve(true);
+                    }
+                    doStuff();
+                });
+            }
+
+            function getAbilityPokemon() {
+                return new Promise(resolve => {
+                    async function doStuff() {
+                        let response = getPokemonsByAbility(document.querySelector("#ability").value);
+
+                        allPokemonAbility = [];
+                        for (let i = 0; i < response.length; i++) {
+                            allPokemonAbility.push(await getRequestAsync(response[i]["pokemon"]["url"]));
+                        }
+                        resolve(true);
+                    }
+                    doStuff();
+                });
+            }
+            
+            populateSelector(document.querySelector("#ability"), "https://pokeapi.co/api/v2/ability/?limit=9999");
+            populateSelector(document.querySelector("#type"), "https://pokeapi.co/api/v2/type/?limit=9999");
+            populateSelector(document.querySelector("#move"), "https://pokeapi.co/api/v2/move/?limit=9999");
+
+            let allPokemonType = [];
+            let allPokemonAbility = [];
+            let allPokemonMove = [];
+
+            window.onload = function() {
+                if (document.querySelector("#type").value == "null" && document.querySelector("#ability").value == "null" && document.querySelector("#move").value == "null") {
+                    fillRandomPokemons();
+                } else {
+                    displayFiltered();
+                }
+            }
+        </script>
+    </body>
+</html>
