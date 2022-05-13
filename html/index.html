@@ -25,9 +25,10 @@
                         <button type="submit">Search</button>
                     </div>
 
-                    <select name="history" id="history" onchange="loadSearch();">
+                    <!-- <select name="history" id="history" onchange="loadSearch();">
                         <option value="null">History</option>
-                    </select>
+                    </select> -->
+                    <input type="button" id="history" onclick="window.location.assign('/timeline')" value="History" />
                 </form>
             </header>
             <div id="pokemons">
@@ -48,31 +49,25 @@
                 <p>Lachlan Butler - 2022</p>
             </footer>
         </div>
+        <script src="js/htmlRequests.js"></script>
         <script src="js/pokeApiStuff.js"></script>
+        <script src="js/timeline.js"></script>
         <script src="js/misc.js"></script>
         <script>
-            class searchHistory {
-                constructor(ability, move, type) {
-                    this.ability = ability;
-                    this.move = move;
-                    this.type = type;
-                }
-            }
-
-            let SearchHistory = {}
-
-            function saveSearch() {
-                const history = document.querySelector("#history");
-                let newSearchEntry = document.createElement("option");
-                let entry = new searchHistory(document.querySelector("#ability").value, document.querySelector("#move").value, document.querySelector("#type").value);
+            async function saveSearch(hits) {
+                let ability = document.querySelector("#ability").value;
+                let move = document.querySelector("#move").value;
+                let type = document.querySelector("#type").value;
                 let date = (new Date());
                 let ts = Math.round(date.getTime() / 1000);
-                SearchHistory[ts] = entry;
                 
-                newSearchEntry.setAttribute("value", ts);
-                newSearchEntry.innerHTML = String(date.getHours() == 0 || date.getHours() == 12 ? 12 : date.getHours() % 12).padStart(2, '0') + ":" + String(date.getMinutes()).padStart(2, '0') + ":" + String(date.getSeconds()).padStart(2, '0');
-                history.appendChild(newSearchEntry);
-                history.value = ts;
+                await putRequestAsync('/timeline/insert', {
+                    ability: ability,
+                    move: move,
+                    type: type,
+                    time: ts,
+                    hits: hits
+                });
             }
 
             function loadSearch() {
@@ -103,12 +98,10 @@
             }
 
             async function fillRandomPokemons() {
-                let pokes = await getRequestAsync("https://pokeapi.co/api/v2/pokemon/?limit=" + "9999");
-
                 let parent = document.querySelector("#pokemons");
                 toggleLoader(false);
                 for (let i = 0; i < 9; i++) {
-                    let response = await getRandomPokemon(pokes);
+                    let response = await getRandomPokemon();
                     addPokemon(parent, response);
                 }
             }
@@ -180,10 +173,6 @@
                 purgePokemon(parent);
                 toggleLoader(true);
 
-                if (newEntry) {
-                    saveSearch();
-                }
-
                 let flag = getFlag("#type", "#ability", "#move");
 
                 if ((flag & 0b111) == 0) {
@@ -210,6 +199,10 @@
 
                 let pIntersect = []
                 pIntersect = getListIntersect(allPokemonType, allPokemonAbility, allPokemonMove);
+
+                if (newEntry) {
+                    saveSearch(pIntersect.length);
+                }
 
                 toggleLoader(false);
                 for (let i = 0; i < pIntersect.length; i++) {
@@ -262,9 +255,9 @@
                 });
             }
             
-            populateSelector(document.querySelector("#ability"), "https://pokeapi.co/api/v2/ability/?limit=9999");
-            populateSelector(document.querySelector("#type"), "https://pokeapi.co/api/v2/type/?limit=9999");
-            populateSelector(document.querySelector("#move"), "https://pokeapi.co/api/v2/move/?limit=9999");
+            populateSelector(document.querySelector("#ability"), "/api/ability");
+            populateSelector(document.querySelector("#type"), "/api/type");
+            populateSelector(document.querySelector("#move"), "/api/move");
 
             let allPokemonType = [];
             let allPokemonAbility = [];

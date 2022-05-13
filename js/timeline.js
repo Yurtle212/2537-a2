@@ -17,6 +17,7 @@ function getAllEvents() {
         cNode.querySelector('.tButtonDelete').addEventListener('click', () => {
             //console.log(event._id);
             deleteTimelineNode(event._id);
+            window.location.reload();
         })
 
         parent.appendChild(cNode);
@@ -26,5 +27,3 @@ function getAllEvents() {
 function deleteTimelineNode(id) {
     putRequestSync(`/timeline/delete/${id}`);
 }
-
-getAllEvents();

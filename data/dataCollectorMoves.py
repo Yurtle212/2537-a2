@@ -11,6 +11,7 @@ for thing in response.json()["results"]:
         tmp = requests.get(thing["url"]).json()
         final[tmp["name"]] = {}
         final[tmp["name"]]["type"] = tmp["type"];
+        final[tmp["name"]]["id"] = tmp["id"];
         final[tmp["name"]]["learned_by_pokemon"] = tmp["learned_by_pokemon"]
         #print(tmp["abilities"])
         #print("\n")
@@ -18,4 +19,4 @@ for thing in response.json()["results"]:
     print(i)
 
 with open('move.json', 'w') as file:
-    file.write(json.dumps(final, indent=4, sort_keys=True).replace("https://pokeapi.co/api/v2/", "/api/"))
+    file.write(json.dumps(final, indent=4, sort_keys=False).replace("https://pokeapi.co/api/v2/", "/api/"))

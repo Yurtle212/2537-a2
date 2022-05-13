@@ -38,6 +38,14 @@ form button {
     border-color: #ffffff;
 }
 
+form input[type=button] {
+    width: 60px;
+    border-radius: 10px;
+    color: white;
+    background-color: #5769d2;
+    border-color: #ffffff;
+}
+
 form div {
     width: 30%;
 }

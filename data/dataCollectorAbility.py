@@ -15,6 +15,7 @@ for thing in response.json()["results"]:
             if (ft["language"]["name"] == "en"):
                 final[tmp["name"]]["flavor_text_entries"] = ft
         final[tmp["name"]]["pokemon"] = tmp["pokemon"]
+        final[tmp["name"]]["id"] = tmp["id"]
         
         #print(tmp["abilities"])
         #print("\n")
@@ -22,4 +23,4 @@ for thing in response.json()["results"]:
     print(i)
 
 with open('ability.json', 'w') as file:
-    file.write(json.dumps(final, indent=4, sort_keys=True).replace("https://pokeapi.co/api/v2/", "/api/"))
+    file.write(json.dumps(final, indent=4, sort_keys=False).replace("https://pokeapi.co/api/v2/", "/api/"))

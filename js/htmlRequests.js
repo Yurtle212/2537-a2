@@ -22,3 +22,15 @@ function putRequestSync(url, data) {
     xmlHttp.send(JSON.stringify(data));
     return JSON.parse(xmlHttp.responseText);
 }
+
+function putRequestAsync(url, data) {
+    return new Promise(resolve => {
+        let xmlHttp = new XMLHttpRequest();
+        xmlHttp.open("PUT", url, false);
+        xmlHttp.setRequestHeader("Accept", "application/json");
+        xmlHttp.setRequestHeader("Content-Type", "application/json");
+        console.log(data);
+        xmlHttp.send(JSON.stringify(data));
+        resolve(JSON.parse(xmlHttp.responseText));
+    });
+}

@@ -11,7 +11,7 @@ function populateSelector(parent, url) {
     const response = getRequest(url);
 
     let allEntries = [];
-    for (let i = 0; i < response.count; i++) {
+    for (let i = 0; i < response.results.length; i++) {
         allEntries.push(response["results"][i]);
     }
     allEntries.sort(compareThings);
