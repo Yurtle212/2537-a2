@@ -12,7 +12,7 @@ function getAllEvents() {
         cNode.querySelector('.tAbility').textContent = `Ability: ${event.ability}`;
         cNode.querySelector('.tMove').textContent = `Move: ${event.move}`;
         cNode.querySelector('.tHits').textContent = `Hits: ${event.hits}`;
-        cNode.querySelector('.tTime').textContent = `Time: ${event.time}`;
+        cNode.querySelector('.tTime').textContent = `${event.time}`;
 
         cNode.querySelector('.tButtonDelete').addEventListener('click', () => {
             //console.log(event._id);
