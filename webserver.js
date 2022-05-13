@@ -17,8 +17,6 @@ const timelineSchema = new mongoose.Schema({
 
 const timelineModel = mongoose.model("timelines", timelineSchema);
 
-const allPokemon = fs.readFileSync('')
-
 var bodyParser = BodyParser.json({
     extended: false
 })
