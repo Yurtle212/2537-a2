@@ -20,6 +20,10 @@ function getAllEvents() {
             window.location.reload();
         })
 
+        cNode.querySelector('.tButtonSearch').addEventListener('click', () => {
+            window.location.assign(`/?ability=${encodeURIComponent(event.ability)}&type=${encodeURIComponent(event.type)}&move=${encodeURIComponent(event.move)}`)
+        });
+
         parent.appendChild(cNode);
     }
 }

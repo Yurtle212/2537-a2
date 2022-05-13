@@ -64,11 +64,6 @@ app.put('/timeline/insert', bodyParser, function (req, res) {
     }
 
     timelineModel.create(data, function (err, data) {
-        if (err) {
-            console.log("Error " + err);
-        } else {
-            console.log("Data " + data);
-        }
         res.send(data);
     });
 });

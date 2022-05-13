@@ -71,16 +71,14 @@
             }
 
             function loadSearch() {
-                const history = document.querySelector("#history");
-                if (history.value == null) {
-                    return;
-                }
+                const search = window.location.search;
+                const params = new URLSearchParams(search);
 
-                let entry = SearchHistory[history.value];
-                document.querySelector("#ability").value = entry.ability;
-                document.querySelector("#move").value = entry.move;
-                document.querySelector("#type").value = entry.type;
-                displayFiltered(false);
+                if (params.has('ability')) {
+                    document.querySelector("#ability").value = params.get('ability');
+                    document.querySelector("#move").value = params.get('move');
+                    document.querySelector("#type").value = params.get('type');
+                }
             }
 
             function search() {
@@ -264,6 +262,8 @@
             let allPokemonMove = [];
 
             window.onload = function() {
+                loadSearch();
+
                 if (document.querySelector("#type").value == "null" && document.querySelector("#ability").value == "null" && document.querySelector("#move").value == "null") {
                     fillRandomPokemons();
                 } else {
