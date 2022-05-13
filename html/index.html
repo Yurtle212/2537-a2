@@ -2,14 +2,14 @@
 <html>
     <head>
         <title>A1 PokeAPI</title>
-        <link rel="stylesheet" href="index.css">
-        <link rel="stylesheet" href="loader.css">
+        <link rel="stylesheet" href="css/index.css">
+        <link rel="stylesheet" href="css/loader.css">
     </head>
     <body>
         <div id="content">
             <header>
-                <h1><a href="./index.html">PokeAPI Client</a></h1>
-                <form action="pokemon.html">
+                <h1><a href="/">PokeAPI Client</a></h1>
+                <form action="/pokemon">
                     <select name="abilities" id="ability" onchange="displayFiltered();">
                         <option value="null">Select Ability</option>
                     </select>
@@ -48,8 +48,8 @@
                 <p>Lachlan Butler - 2022</p>
             </footer>
         </div>
-        <script src="./pokeApiStuff.js"></script>
-        <script src="./misc.js"></script>
+        <script src="js/pokeApiStuff.js"></script>
+        <script src="js/misc.js"></script>
         <script>
             class searchHistory {
                 constructor(ability, move, type) {
@@ -90,11 +90,11 @@
 
             function search() {
                 if (document.querySelector("#search").value == "") { return; }
-                window.location.assign("./pokemon.html?search=" + document.querySelector("#search").value);
+                window.location.assign("/pokemon?search=" + document.querySelector("#search").value);
             }
 
             function search(pokerman) {
-                window.location.assign("./pokemon.html?search=" + pokerman);
+                window.location.assign("/pokemon?search=" + pokerman);
             }
 
             function toggleLoader(enabled) {
