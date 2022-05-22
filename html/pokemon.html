@@ -32,6 +32,7 @@
                     <p class="sat">SAT: </p>
                     <p class="spd">SPD: </p>
                 </div>
+                <button id="AddToCart">Add to Cart</button>
             </div>
             <div id="right">
                 <div id="moves">
@@ -49,8 +50,16 @@
     </div>
 
     <script src="js/pokeApiStuff.js"></script>
+    <script src="js/htmlRequests.js"></script>
     <script src="js/misc.js"></script>
     <script>
+        async function addToCart(id) {
+            if (await isLoggedIn()) {
+                let res = putRequestSync('/cart/add', {pokemonID: id});
+                window.location.assign('/cart');
+            }
+        }
+
         function search() {
             if (document.querySelector("#search").value == "") { return; }
             window.location.assign("./pokemon.html?search=" + document.querySelector("#search").value);
@@ -110,6 +119,7 @@
             document.querySelector(".def").innerHTML += stats[2]["base_stat"];
             document.querySelector(".sat").innerHTML += stats[4]["base_stat"];
             document.querySelector(".spd").innerHTML += stats[5]["base_stat"];
+            document.querySelector('#AddToCart').setAttribute('onclick', `addToCart(${response.id});`);
 
             let typesDiv = document.querySelector(".types");
 

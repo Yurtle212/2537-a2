@@ -9,9 +9,10 @@ async function getRequestAsync(url) {
     return new Promise(resolve => {
         let xmlHttp = new XMLHttpRequest();
         xmlHttp.open("GET", url, true);
+        xmlHttp.onload = function (e) {
+            resolve(JSON.parse(xmlHttp.responseText));
+        }
         xmlHttp.send(null);
-        console.log(xmlHttp.responseText);
-        resolve(JSON.parse(xmlHttp.responseText));
     });
 }
 
@@ -47,4 +48,12 @@ function postRequestAsync(url, data) {
         xmlHttp.send(JSON.stringify(data));
         resolve(JSON.parse(xmlHttp.responseText));
     });
+}
+
+async function isLoggedIn() {
+    let res = await getRequestAsync('/accounts/getUserInfo');
+    if (res.Result) {
+        return false;
+    }
+    return true;
 }

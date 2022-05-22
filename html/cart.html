@@ -1,0 +1,128 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <title>Timeline</title>
+        <link rel="stylesheet" href="css/index.css">
+        <link rel="stylesheet" href="css/cart.css">
+    </head>
+    <body>
+        <div id="content">
+            <header>
+                <h1><a href="/">PokeAPI Client</a></h1>
+                <form action="/pokemon">
+                    
+                    <div>
+                        <input type="text" id="search" name="search" placeholder="Search by name..." value="" />
+                        <button type="submit">Search</button>
+                    </div>
+    
+                    <!-- <select name="history" id="history" onchange="loadSearch();">
+                        <option value="null">History</option>
+                    </select> -->
+                    <input type="button" id="history" onclick="logout()" value="Logout" />
+                </form>
+            </header>
+            <div id="stuff">
+                <div id="userInfo">
+                    <h3 id="username"></h3>
+                </div>
+                <div id="cart">
+                    <template id="cartNodeTemplate">
+                        <div class="cartNode">
+                            <p class="CNName"></p>
+                            <img class="CNImg" />
+                        </div>
+                    </template>
+                </div>
+                <button id="orderButton" onclick="order()">Complete Order</button>
+                <div id="previousOrders">
+                    <template id="orderTemplate">
+                        <div class="previousOrder">
+                            <p class="orderTimestamp"></p>
+                            <div class="cartSection">
+
+                            </div>
+                        </div>
+                    </template>
+                </div>
+            </div>
+            <footer>
+                <p>Lachlan Butler - 2022</p>
+            </footer>
+        </div>
+        <script src="js/htmlRequests.js"></script>
+        <script src="js/pokeApiStuff.js"></script>
+        <script>
+            async function filloutCart() {
+                const template = document.querySelector('#cartNodeTemplate');
+                const parent = document.querySelector("#cart");
+                const cart = await getRequestAsync('/cart/getCart');
+                const url = 'https://pokeapi.co/api/v2/pokemon/';
+                console.log(cart)
+
+                for (cartI in cart) {
+                    let item = cart[cartI];
+                    let cNode = template.content.cloneNode(true);
+                    let pokemonData = await getRequestAsync(url + item);
+                    
+                    cNode.querySelector('.CNName').innerHTML = pokemonData.name;
+                    cNode.querySelector('.CNImg').setAttribute('src', getPokemonArtUrl(pokemonData));
+                    cNode.querySelector('.cartNode').setAttribute('onclick', `window.location.assign('/pokemon?search=${item}');`)
+                    parent.appendChild(cNode);
+                }
+            }
+
+            async function filloutPreviousOrders() {
+                const template = document.querySelector('#orderTemplate');
+                const nTemplate = document.querySelector('#cartNodeTemplate');
+                const parent = document.querySelector("#previousOrders");
+                const orders = await getRequestAsync('/cart/getOrders');
+                const url = 'https://pokeapi.co/api/v2/pokemon/';
+
+                for (orderI in orders) {
+                    let cOrder = orders[orderI];
+                    let cParent = template.content.cloneNode(true).querySelector('.previousOrder');
+
+                    cParent.querySelector('.orderTimestamp').innerHTML = "Ordered at " + new Date(Date.parse(cOrder.timestamp)).toLocaleString();
+
+                    let cart = cOrder.pokemonList;
+
+                    for (cartI in cart) {
+                        let item = cart[cartI];
+                        let cNode = nTemplate.content.cloneNode(true);
+                        let pokemonData = await getRequestAsync(url + item);
+                        
+                        cNode.querySelector('.CNName').innerHTML = pokemonData.name;
+                        cNode.querySelector('.CNImg').setAttribute('src', getPokemonArtUrl(pokemonData));
+                        cNode.querySelector('.cartNode').setAttribute('onclick', `window.location.assign('/pokemon?search=${item}');`)
+                        cParent.querySelector('.cartSection').appendChild(cNode);
+                    }
+                    parent.appendChild(cParent);
+                }
+            }
+
+            async function getUserInfo() {
+                let res = getRequestSync('/accounts/getUserInfo');
+                document.querySelector('#username').innerHTML = res[0].username + "'s cart";
+            }
+
+            async function logout() {
+                //console.log('logging out.')
+                let res = getRequestSync('/accounts/logout');
+
+                console.log(res);
+                window.location.assign('/');
+            }
+
+            async function order() {
+                let res = await putRequestAsync('/cart/order', {});
+                // console.log(res);
+                window.location.reload();
+            }
+
+            getUserInfo();
+            filloutCart();
+            filloutPreviousOrders();
+        </script>
+    </body>
+</html>

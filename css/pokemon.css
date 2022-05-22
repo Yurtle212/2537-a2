@@ -20,6 +20,12 @@
     padding: 1%;
 }
 
+#Left button {
+    width: 50%;
+    font-size: larger;
+    margin-top: 5%;
+}
+
 form div {
     width: 100%;
 }

@@ -25,6 +25,17 @@ const userSchema = new mongoose.Schema({
     password: String
 });
 
+const cartSchema = new mongoose.Schema({
+    userID: Number,
+    pokemonList: Array
+});
+
+const orderSchema = new mongoose.Schema({
+    userID: Number,
+    pokemonList: Array,
+    timestamp: {type: Date, default: Date.now}
+});
+
 app.use(session({
     secret: "1746598729385744815909",
     name: "PokeSession",
@@ -34,6 +45,8 @@ app.use(session({
 
 const timelineModel = mongoose.model("timelines", timelineSchema);
 const userModel = mongoose.model("users", userSchema);
+const cartModel = mongoose.model("carts", cartSchema);
+const orderModel = mongoose.model("orders", orderSchema);
 
 const pokemon = JSON.parse(fs.readFileSync("./data/pokemon.json"));
 const move = JSON.parse(fs.readFileSync("./data/move.json"));
@@ -68,6 +81,11 @@ app.get('/', function (req, res) {
 
 app.get('/pokemon', function (req, res) {
     let doc = fs.readFileSync('./html/pokemon.html', "utf8");
+    res.send(doc);
+});
+
+app.get('/cart', reqLogin, function (req, res) {
+    let doc = fs.readFileSync('./html/cart.html', "utf8");
     res.send(doc);
 });
 
@@ -304,6 +322,89 @@ app.get('/accounts/logout', reqLogin, (req, res) => {
                 "msg": "Successfully logged out."
             })
         }
+    });
+});
+
+//#endregion
+
+//#region CARTS
+
+app.put('/cart/add', reqLogin, bodyParser, (req, res) => {
+    let pokemonID = req.body.pokemonID;
+    cartModel.find({'userID': req.session.uid}, function (err, data) {
+        let cart = [];
+        if (data.length == 0) {
+            let inData = {
+                'userID': req.session.uid,
+                'pokemonList': []
+            }
+        
+            cartModel.create(inData, function (err, data) {
+                console.log(data);
+            });
+        } else {
+            cart = data[0].pokemonList;
+        }
+        console.log(cart);
+        cart.push(pokemonID);
+        cartModel.updateOne({userID: req.session.uid}, {
+            $set: { 'pokemonList': cart }
+        }, function (err, uData) {
+            console.log(uData);
+            res.send(uData)
+        });
+    });
+});
+
+app.put('/cart/order', reqLogin, (req, res) => {
+    cartModel.find({'userID': req.session.uid}, function (err, data) {
+        if (data.length == 0 || data[0].pokemonList.length == 0) { 
+            res.send({"result": 'cart is empty.'});
+            return;
+        }
+        let cart = data[0].pokemonList;
+        console.log(cart);
+        
+        let inData = {
+            'userID': req.session.uid,
+            'pokemonList': cart
+        }
+    
+        orderModel.create(inData, function (err, data) {
+            console.log(data);
+        });
+
+        cartModel.updateOne({id: req.params.id}, {
+            $set: { 'pokemonList': [] }
+        }, function (err, uData) {
+            res.send(cart)
+        });
+    });
+});
+
+app.get('/cart/getCart', reqLogin, (req, res) => {
+    cartModel.find({'userID': req.session.uid}, function (err, data) {
+        let cart = [];
+        if (data.length == 0) {
+            let inData = {
+                'userID': req.session.uid,
+                'pokemonList': []
+            }
+        
+            cartModel.create(inData, function (err, data) {
+                console.log(data);
+            });
+        } else {
+            cart = data[0].pokemonList;
+        }
+
+        res.send(cart);
+    });
+});
+
+app.get('/cart/getOrders', reqLogin, (req, res) => {
+    orderModel.find({'userID': req.session.uid}, function (err, data) {
+        res.send(data);
     });
 });
 
