@@ -1,0 +1,34 @@
+#signupForm {
+    width: 100%;
+    height: 100%;
+}
+
+#signupForm form {
+    width: 100%;
+    height: 100%;
+    display: flex;
+    flex-direction: column;
+    align-content: center;
+    justify-content: center;
+    row-gap: 10px;
+}
+
+#signupForm form input, #signupForm form p {
+    font-size: x-large;
+    width: 50%;
+    height: 5%;
+    margin-left: auto;
+    margin-right: auto;
+}
+
+#signupForm form p {
+    text-align: center;
+}
+
+#signupForm form input[type=text], #signupForm form input[type=password] {
+    border-radius: 10px;
+}
+
+#signupForm form input[type=button] {
+    width: 20%;
+}

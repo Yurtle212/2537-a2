@@ -71,26 +71,31 @@ app.get('/pokemon', function (req, res) {
     res.send(doc);
 });
 
-app.get('/timeline', reqLogin, function (req, res) {
-    let doc = fs.readFileSync('./html/timelines.html', "utf8");
+app.get('/profile', function (req, res) {
+    let doc;
+    if (req.session.loggedIn) {
+        doc = fs.readFileSync('./html/profile.html', "utf8");
+    } else {
+        doc = fs.readFileSync('./html/login.html', "utf8");
+    }
     res.send(doc);
 });
 
-app.get('/signup', function (req, res) {
-    let doc = fs.readFileSync('./html/signup.html', "utf8");
-    res.send(doc);
-});
+// app.get('/signup', function (req, res) {
+//     let doc = fs.readFileSync('./html/signup.html', "utf8");
+//     res.send(doc);
+// });
 
-app.get('/login', function (req, res) {
-    let doc = fs.readFileSync('./html/login.html', "utf8");
-    res.send(doc);
-});
+// app.get('/login', function (req, res) {
+//     let doc = fs.readFileSync('./html/login.html', "utf8");
+//     res.send(doc);
+// });
 
 //#region TIMELINE
 
 app.get('/timeline/getAllEvents', reqLogin, function (req, res) {
     let uid = req.session.uid;
-    timelineModel.find({}, function (err, data) {
+    timelineModel.find({'userID': uid}, function (err, data) {
         res.send(data);
     });
 });
@@ -98,7 +103,7 @@ app.get('/timeline/getAllEvents', reqLogin, function (req, res) {
 app.put('/timeline/insert', reqLogin, bodyParser, function (req, res) {
     //console.log("body: " + JSON.stringify(req.body));
     let data = {
-        'userID': 0,
+        'userID': req.session.uid,
         'ability': req.body.ability,
         'move': req.body.move,
         'type': req.body.type,
@@ -238,6 +243,10 @@ app.post('/accounts/signup', bodyParser, async (req, res) => {
     }
 
     userModel.create(inData, function (err, data) {
+        req.session.loggedIn = true;
+        req.session.uid = newUID;
+        req.session.username = req.body.username,
+
         res.send({
             "Result": "Success",
             "msg": "Account Created.",
@@ -284,6 +293,7 @@ app.post('/accounts/login', bodyParser, (req, res) => {
 app.get('/accounts/logout', reqLogin, (req, res) => {
     req.session.destroy(function (error) {
         if (error) {
+            console.log('aaa');
             res.status(400).send({
                 "Result": "Failed",
                 "msg": "Could not log out."

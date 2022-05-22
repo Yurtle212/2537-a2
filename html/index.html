@@ -28,7 +28,7 @@
                     <!-- <select name="history" id="history" onchange="loadSearch();">
                         <option value="null">History</option>
                     </select> -->
-                    <input type="button" id="history" onclick="window.location.assign('/timeline')" value="History" />
+                    <input type="button" id="history" onclick="window.location.assign('/profile')" value="Account" />
                 </form>
             </header>
             <div id="pokemons">
@@ -61,7 +61,7 @@
                 let date = (new Date());
                 let ts = Math.round(date.getTime() / 1000);
                 
-                await putRequestAsync('/timeline/insert', {
+                let res = await putRequestAsync('/timeline/insert', {
                     ability: ability,
                     move: move,
                     type: type,
@@ -97,9 +97,10 @@
 
             async function fillRandomPokemons() {
                 let parent = document.querySelector("#pokemons");
+                let data = await getRequestAsync("https://pokeapi.co/api/v2/pokemon?limit=100000&offset=0");
                 toggleLoader(false);
                 for (let i = 0; i < 9; i++) {
-                    let response = await getRandomPokemon();
+                    let response = await getRandomPokemon(data);
                     addPokemon(parent, response);
                 }
             }
@@ -253,9 +254,9 @@
                 });
             }
             
-            populateSelector(document.querySelector("#ability"), "/api/ability");
-            populateSelector(document.querySelector("#type"), "/api/type");
-            populateSelector(document.querySelector("#move"), "/api/move");
+            populateSelector(document.querySelector("#ability"), "https://pokeapi.co/api/v2/ability");
+            populateSelector(document.querySelector("#type"), "https://pokeapi.co/api/v2/type");
+            populateSelector(document.querySelector("#move"), "https://pokeapi.co/api/v2/move");
 
             let allPokemonType = [];
             let allPokemonAbility = [];

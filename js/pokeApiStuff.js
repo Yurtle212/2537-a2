@@ -22,8 +22,9 @@ async function getRequestAsync(url) {
 async function getRandomPokemon(data) {
     return new Promise(resolve => {
         async function doIt() {
-            let res = await getRequestAsync("/api/randomPokemon");
-            resolve(res);
+            let pokemon = data.results;
+            let randNum = Math.floor(Math.random() * Object.keys(pokemon).length) + 1;
+            resolve(await getRequestAsync(pokemon[Object.keys(pokemon)[randNum]].url));
         }
         doIt();
     });
@@ -42,29 +43,29 @@ function getPokemonStats(json) {
 }
 
 function validatePokemon(name) {
-    let res = getRequest("/api/pokemon/" + name);
+    let res = getRequest("https://pokeapi.co/api/v2/pokemon/" + name);
     return res == null ? false : true;
 }
 
 function getPokemonsByType(type) {
-    let res = getRequest("/api/type/" + type);
+    let res = getRequest("https://pokeapi.co/api/v2/type/" + type);
     return res["pokemon"];
 }
 
 function getPokemonsByAbility(ability) {
-    let res = getRequest("/api/ability/" + ability);
+    let res = getRequest("https://pokeapi.co/api/v2/ability/" + ability);
     return res["pokemon"];
 }
 
 function getPokemonsByMove(move) {
-    let res = getRequest("/api/move/" + move);
+    let res = getRequest("https://pokeapi.co/api/v2/move/" + move);
     return res["learned_by_pokemon"];
 }
 
 function getMoveType(move) {
     return new Promise(resolve => {
         async function doIt() {
-            let res = await getRequestAsync("/api/move/" + move);
+            let res = await getRequestAsync("https://pokeapi.co/api/v2/move/" + move);
             resolve(await getRequestAsync(res["type"]["url"]));
         }
         doIt();
