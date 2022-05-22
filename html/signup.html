@@ -1,0 +1,29 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <title>Signup</title>
+    </head>
+    <body>
+        <div id="signupForm">
+            <form>
+                <input type="text" name="Username" id="usernameInput" placeholder="Username"/>
+                <input type="password" name="Password" id="passwordInput" placeholder="Password"/>
+                <input type="button" name="Signup" id="signupButton" value="Sign Up" onclick="signup();"/>
+            </form>
+        </div>
+        <script src="js/htmlRequests.js"></script>
+        <script>
+            async function signup() {
+                let username = document.querySelector("#usernameInput").value;
+                let password = document.querySelector("#passwordInput").value;
+
+                let res = await postRequestAsync('/accounts/signup', {
+                    'username': username,
+                    'password': password
+                });
+
+                console.log(res);
+            }
+        </script>
+    </body>
+</html>

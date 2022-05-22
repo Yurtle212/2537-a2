@@ -34,3 +34,15 @@ function putRequestAsync(url, data) {
         resolve(JSON.parse(xmlHttp.responseText));
     });
 }
+
+function postRequestAsync(url, data) {
+    return new Promise(resolve => {
+        let xmlHttp = new XMLHttpRequest();
+        xmlHttp.open("POST", url, false);
+        xmlHttp.setRequestHeader("Accept", "application/json");
+        xmlHttp.setRequestHeader("Content-Type", "application/json");
+        console.log(data);
+        xmlHttp.send(JSON.stringify(data));
+        resolve(JSON.parse(xmlHttp.responseText));
+    });
+}
