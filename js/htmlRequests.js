@@ -10,6 +10,8 @@ async function getRequestAsync(url) {
         let xmlHttp = new XMLHttpRequest();
         xmlHttp.open("GET", url, true);
         xmlHttp.send(null);
+        console.log(xmlHttp.responseText);
+        resolve(JSON.parse(xmlHttp.responseText));
     });
 }
 

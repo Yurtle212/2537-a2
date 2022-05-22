@@ -23,6 +23,9 @@
                 </form>
             </header>
             <div id="stuff">
+                <div id="userInfo">
+                    <h3 id="username"></h3>
+                </div>
                 <div id="timeline">
                     <template id="timelineNodeTemplate">
                         <div class="timelineNode">
@@ -46,6 +49,11 @@
         <script>
             getAllEvents();
 
+            async function getUserInfo() {
+                let res = getRequestSync('/accounts/getUserInfo');
+                document.querySelector('#username').innerHTML = res[0].username + "'s timeline";
+            }
+
             async function logout() {
                 console.log('logging out.')
                 let res = getRequestSync('/accounts/logout');
@@ -53,6 +61,8 @@
                 console.log(res);
                 window.location.assign('/');
             }
+
+            getUserInfo();
         </script>
     </body>
 </html>
