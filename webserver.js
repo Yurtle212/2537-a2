@@ -6,7 +6,9 @@ const res = require('express/lib/response');
 const session = require("express-session");
 
 const mongoose = require('mongoose');
-mongoose.connect("mongodb://localhost:27017/LBA3DB", {
+
+const  mongoAtlasUri = "mongodb+srv://pokeapiClient:xqgp2lbm9jAJ2EGq@pokeapithing.gtend.mongodb.net/?retryWrites=true&w=majority";
+mongoose.connect(mongoAtlasUri, {
     useNewUrlParser: true,
     useUnifiedTopology: true
 });
@@ -61,11 +63,11 @@ function reqLogin(req, res, next) {
     if (req.session.loggedIn) {
         next();
     } else {
-        //res.redirect('/login');
-        res.send({
-            "Result": "Failed",
-            "msg": "Not logged in."
-        });
+        res.redirect('/profile');
+        // res.send({
+        //     "Result": "Failed",
+        //     "msg": "Not logged in."
+        // });
         return;
     }
 }
@@ -73,6 +75,7 @@ function reqLogin(req, res, next) {
 app.use("/html", express.static("./html"));
 app.use("/css", express.static("./css"));
 app.use("/js", express.static("./js"));
+app.use("/img", express.static("./img"));
 
 app.get('/', function (req, res) {
     let doc = fs.readFileSync('./html/index.html', "utf8");
@@ -86,6 +89,11 @@ app.get('/pokemon', function (req, res) {
 
 app.get('/cart', reqLogin, function (req, res) {
     let doc = fs.readFileSync('./html/cart.html', "utf8");
+    res.send(doc);
+});
+
+app.get('/memory', function (req, res) {
+    let doc = fs.readFileSync('./html/memory.html', "utf8");
     res.send(doc);
 });
 
@@ -345,7 +353,7 @@ app.put('/cart/add', reqLogin, bodyParser, (req, res) => {
         } else {
             cart = data[0].pokemonList;
         }
-        console.log(cart);
+        //console.log(cart);
         cart.push(pokemonID);
         cartModel.updateOne({userID: req.session.uid}, {
             $set: { 'pokemonList': cart }
@@ -363,7 +371,7 @@ app.put('/cart/order', reqLogin, (req, res) => {
             return;
         }
         let cart = data[0].pokemonList;
-        console.log(cart);
+        //console.log(cart);
         
         let inData = {
             'userID': req.session.uid,
@@ -371,12 +379,14 @@ app.put('/cart/order', reqLogin, (req, res) => {
         }
     
         orderModel.create(inData, function (err, data) {
-            console.log(data);
+            //console.log(data);
         });
 
-        cartModel.updateOne({id: req.params.id}, {
+        cartModel.updateOne({'userID': req.session.uid}, {
             $set: { 'pokemonList': [] }
         }, function (err, uData) {
+            // console.log(err);
+            console.log(uData);
             res.send(cart)
         });
     });
@@ -392,7 +402,7 @@ app.get('/cart/getCart', reqLogin, (req, res) => {
             }
         
             cartModel.create(inData, function (err, data) {
-                console.log(data);
+                //console.log(data);
             });
         } else {
             cart = data[0].pokemonList;

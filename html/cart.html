@@ -19,7 +19,8 @@
                     <!-- <select name="history" id="history" onchange="loadSearch();">
                         <option value="null">History</option>
                     </select> -->
-                    <input type="button" id="history" onclick="logout()" value="Logout" />
+                    <input type="button" id="history" onclick="window.location.assign('/profile')" value="Account" />
+                    <input type="button" id="logout" onclick="doLogout()" value="Logout" />
                 </form>
             </header>
             <div id="stuff">
@@ -106,8 +107,8 @@
                 document.querySelector('#username').innerHTML = res[0].username + "'s cart";
             }
 
-            async function logout() {
-                //console.log('logging out.')
+            async function doLogout() {
+                console.log('logging out.')
                 let res = getRequestSync('/accounts/logout');
 
                 console.log(res);
@@ -116,7 +117,7 @@
 
             async function order() {
                 let res = await putRequestAsync('/cart/order', {});
-                // console.log(res);
+                console.log(res);
                 window.location.reload();
             }
 
